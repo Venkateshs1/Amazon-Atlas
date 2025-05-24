@@ -22,3 +22,65 @@ db.aggregateproduct.insertMany( [
    { product: "register", quantity: 25, size: { height: 14, weight: 21, unit: "cm" }, status: "A" },
    { product: "book", quantity: 50, size: { height: 8.5, weight: 11, unit: "in" }, status: "A" }
 ]);
+
+db.aggregateproduct.aggregate([
+   { $match: { status: "A" } },
+   { $group: { _id: "$product", total: { $sum: "$quantity" } } }
+])
+
+
+db.aggregateproduct.aggregate([
+   { $match: { status: "A" } },
+   { $group: { _id: "$product", total: { $sum: "$quantity" } } },
+   {$sort : { total : 1 }
+   }
+])
+
+
+db.aggregateproduct.aggregate([
+   { $match: { status: "A" } },
+   { $addFields: {
+    maxWeight: { $max: "$size.weight" },
+    minSizeHeight: { $min: "$size.height" }
+	} }
+])
+
+
+db.aggregateproduct.aggregate([
+   { $match: { status: "A" } },
+   { $addFields: {
+    maxQ: { $max: "$quantity" },
+    minSizeHeight: { $min: "$size.height" }
+	} }
+])
+
+
+db.aggregateproduct.aggregate([
+   { $project : { product : 1,quantity : 1 } } , //optional line
+   { $group: { _id: "$product", total: { $sum: "$quantity" } } },
+   {$sort : { total : 1 }
+   }
+])
+
+firstdb> db.aggregateproduct.aggregate([
+...    { $project : { product : 1,quantity : 1 } } ,
+...    { $group: { _id: "$product", total: { $sum: "$quantity" } } },
+...    {$sort : { total : 1 }
+...    }
+... ])
+[
+  { _id: 'register', total: 75 },
+  { _id: 'envelop', total: 90 },
+  { _id: 'book', total: 150 },
+  { _id: 'timetable', total: 150 },
+  { _id: 'sheet', total: 200 }
+]
+firstdb> db.aggregateproduct.aggregate([{ $group: { _id: "$product", total: { $sum: "$quantity" } } }, { $sort: { total: 1 } }] )
+[
+  { _id: 'register', total: 75 },
+  { _id: 'envelop', total: 90 },
+  { _id: 'book', total: 150 },
+  { _id: 'timetable', total: 150 },
+  { _id: 'sheet', total: 200 }
+]
+
